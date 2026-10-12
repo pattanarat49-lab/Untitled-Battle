@@ -60,7 +60,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 22px;
+  gap: 16px;
   background:
     repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 2px, transparent 2px 6px),
     radial-gradient(circle at 50% 35%, #4a2a7a, #120a24 70%);
@@ -69,7 +69,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 #title h1 {
   font-family: var(--pixel);
-  font-size: 56px;
+  font-size: 46px;
   line-height: 1.25;
   margin: 0;
   color: #ffd84a;
@@ -82,7 +82,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .menu-list { display: flex; flex-direction: column; gap: 14px; }
 .menu-list button {
   width: 420px;
-  padding: 16px 20px;
+  padding: 12px 20px;
   font-family: var(--pixel);
   font-size: 20px;
   text-align: left;
@@ -119,7 +119,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #select header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 #select h2 { margin: 0; font-family: var(--pixel); font-size: 18px; line-height: 1.6; }
 #select h2 .p1 { color: var(--p1); }
-#select h2 .p2 { color: var(--p2); }
 #search {
   width: 260px;
   padding: 8px 12px;
@@ -194,40 +193,31 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #confirmBtn:disabled { opacity: .4; cursor: default; }
 
 /* ---------- Battle ---------- */
+/* The beach arena: the image is scaled to the field's width and shifted so its two grass patches sit under the heroes. */
 .field {
   position: absolute;
   inset: 0 0 180px 0;
-  background:
-    repeating-linear-gradient(0deg, rgba(255,255,255,.55) 0 3px, transparent 3px 14px),
-    linear-gradient(var(--sky1), var(--sky2));
+  background: #7cc0f0 url("assets/battle-bg.jpg") 0 -115px / 960px auto no-repeat;
+  image-rendering: pixelated;
   overflow: hidden;
 }
-.pad {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, var(--grass) 55%, var(--grass-dark) 72%, transparent 73%);
-}
-.pad-foe { width: 440px; height: 120px; right: 30px; top: 168px; }
-.pad-me { width: 520px; height: 130px; left: -40px; bottom: -40px; }
-
 .sprite {
   position: absolute;
   image-rendering: pixelated;
   transition: transform .18s, opacity .3s, filter .2s;
 }
 /* Sprites are ~32px pictures drawn at 6x (foe) and 7x (yours). */
-.sprite.foe { right: 160px; top: 40px; height: 192px; transform-origin: bottom center; }
-.sprite.me { left: 120px; bottom: 0; height: 240px; transform: scaleX(-1); transform-origin: bottom center; }
-.sprite.lunge-me { transform: scaleX(-1) translate(-60px, -20px); }
-.sprite.lunge-foe { transform: translate(-60px, 20px); }
+/* Riftborn sprites face right: yours (left) as drawn, the foe (right) mirrored, so they face each other. */
+.sprite.foe { --flip: -1; --ly: 20px; right: 160px; top: 40px; height: 192px; transform: scaleX(-1); transform-origin: bottom center; }
+.sprite.me { --flip: 1; --ly: -20px; left: 180px; bottom: 0; height: 240px; transform-origin: bottom center; }
+.sprite.lunge { transform: scaleX(var(--flip)) translate(70px, var(--ly)); }
+.sprite.recoil { transform: scaleX(var(--flip)) translate(-26px, 0); }
 .sprite.hit { animation: blink .5s steps(2) 2; }
-.sprite.faint { opacity: 0; transform: translateY(60px); }
-.sprite.me.faint { transform: scaleX(-1) translateY(60px); }
+.sprite.faint { opacity: 0; transform: scaleX(var(--flip)) translateY(60px); }
 .sprite.enter { animation: enter .45s ease-out; }
-.sprite.me.enter { animation: enter-me .45s ease-out; }
+.sprite.cast { filter: drop-shadow(0 0 10px var(--glow, #fff)) brightness(1.25); }
 @keyframes blink { 50% { opacity: .1; } }
-@keyframes enter { from { transform: scale(.2); opacity: 0; } }
-@keyframes enter-me { from { transform: scaleX(-.2) scaleY(.2); opacity: 0; } }
+@keyframes enter { from { transform: scaleX(calc(var(--flip) * .2)) scaleY(.2); opacity: 0; } }
 
 .shake { animation: shake .35s; }
 @keyframes shake {
@@ -237,36 +227,34 @@ button { font: inherit; color: inherit; cursor: pointer; }
   80% { transform: translate(6px, 0); }
 }
 
-#fx { position: absolute; inset: 0; pointer-events: none; }
-.burst {
+#fx { position: absolute; inset: 0; width: 960px; height: 420px; pointer-events: none; }
+#flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+#flash.on { animation: flash .35s ease-out; }
+@keyframes flash { from { opacity: .75; } to { opacity: 0; } }
+/* The skill name sweeps across the field when a skill is cast. */
+#banner {
   position: absolute;
-  width: 180px;
-  height: 180px;
-  margin: -90px 0 0 -90px;
-  border-radius: 50%;
-  animation: burst .5s ease-out forwards;
-  mix-blend-mode: screen;
+  left: 0;
+  right: 0;
+  top: 168px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pixel);
+  font-size: 30px;
+  color: #fff;
+  text-shadow: 3px 3px 0 #000;
+  letter-spacing: 3px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 5;
 }
-@keyframes burst {
-  from { transform: scale(.1); opacity: 1; }
-  to { transform: scale(1.4); opacity: 0; }
-}
-.orb {
-  position: absolute;
-  width: 34px;
-  height: 34px;
-  margin: -17px 0 0 -17px;
-  border-radius: 50%;
-  transition: left .35s linear, top .35s linear;
-}
-.heal-ring {
-  position: absolute;
-  width: 160px;
-  height: 160px;
-  margin: -80px 0 0 -80px;
-  border: 6px solid #7cffb0;
-  border-radius: 50%;
-  animation: burst .7s ease-out forwards;
+#banner.on { animation: banner 1s ease-out; }
+@keyframes banner {
+  0% { opacity: 0; transform: translateX(-60%) skewX(-12deg); }
+  20%, 70% { opacity: 1; transform: translateX(0) skewX(-12deg); }
+  100% { opacity: 0; transform: translateX(60%) skewX(-12deg); }
 }
 
 .infobox {
@@ -308,19 +296,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .balls i { width: 14px; height: 14px; border-radius: 50%; background: linear-gradient(#e84040 50%, #fff 50%); border: 2px solid #333; }
 .balls i.out { background: #999; }
 
-#turnTag {
-  position: absolute;
-  left: 50%;
-  top: 8px;
-  transform: translateX(-50%);
-  font-family: var(--pixel);
-  font-size: 12px;
-  color: #fff;
-  padding: 6px 12px;
-  border-radius: 6px;
-}
-#turnTag:empty { display: none; }
-
 .console {
   position: absolute;
   left: 0;
@@ -345,6 +320,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   text-shadow: 2px 2px 0 #16303f;
 }
 .msgbox p { margin: 0; white-space: pre-line; }
+.msgbox .desc { display: block; font-size: 19px; line-height: 1.45; }
 .cmdbox {
   width: 440px;
   background: #fff;
@@ -375,3 +351,51 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .cmdbox.list button { font-family: var(--thai); font-size: 17px; }
 .cmdbox.list button small { color: #777; font-size: 13px; display: block; }
 .cmdbox.wide { width: 560px; }
+
+/* ---------- Shop ---------- */
+#shop {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px 40px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0 2px, transparent 2px 40px),
+    linear-gradient(#3a2414, #1e120a);
+  color: #fff4dc;
+}
+#shop header { display: flex; justify-content: space-between; align-items: center; }
+#shop h2 { margin: 0; font-family: var(--pixel); font-size: 26px; color: #ffd84a; text-shadow: 3px 3px 0 #000; }
+.coins { font-family: var(--pixel); font-size: 18px; color: #ffd84a; }
+.coins::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 10px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff6b0, #f0b020 60%, #a06a00); vertical-align: -2px; }
+#shopList { display: flex; flex-direction: column; gap: 8px; }
+#shopList button {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 140px 110px;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  padding: 8px 18px 8px 48px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 4px solid #8a5a2a;
+  border-radius: 10px;
+  font-size: 17px;
+}
+#shopList button b { font-family: var(--pixel); font-size: 15px; display: block; margin-bottom: 4px; }
+#shopList button .price { font-family: var(--pixel); font-size: 14px; color: #a06a00; }
+#shopList button .own { font-size: 15px; color: #666; }
+#shopList button.sel::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 10px solid transparent;
+  border-left: 14px solid var(--ink);
+  border-right: none;
+}
+#shopList button:disabled { opacity: .55; cursor: default; }
+#shopList button.back { grid-template-columns: 1fr; font-family: var(--pixel); font-size: 15px; }
+#shopMsg { min-height: 26px; font-size: 18px; }
+#title .coins { margin: 0; }
