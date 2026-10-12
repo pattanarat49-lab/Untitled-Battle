@@ -153,15 +153,51 @@ const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const shuffle = (arr) => arr.map((v) => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map((p) => p[1]);
 const imgOf = (id) => `assets/heroes/${id}.png`;
 
+/** Fills the window: picks a portrait or landscape stage, stretches its long side to the screen's shape, then scales it. */
 function fit() {
-  const s = Math.min(innerWidth / 960, innerHeight / 600);
-  $("stage").style.transform = `scale(${s})`;
+  const vw = innerWidth;
+  const vh = innerHeight;
+  const portrait = vh > vw;
+  const base = portrait ? { w: 600, h: 960 } : { w: 960, h: 600 };
+  const s = Math.min(vw / base.w, vh / base.h);
+  const stage = $("stage");
+  stage.style.width = `${vw / s}px`;
+  stage.style.height = `${vh / s}px`;
+  stage.style.transform = `scale(${s})`;
+  stage.classList.toggle("portrait", portrait);
+  fitArena();
+}
+
+/** Scales the 960x420 arena into the field: as tall as the field allows, narrow enough to keep both heroes in view. */
+function fitArena() {
+  const field = $("battle").querySelector(".field");
+  const fw = field.clientWidth;
+  const fh = field.clientHeight;
+  if (!fw || !fh) return;
+  const s = Math.min(fh / 420, fw / 640); // the two heroes stand ~440px apart; keep them and their effects on screen
+  const x = fw / 2 - 500 * s; // centre between the heroes
+  $("arena").style.transform = `translate(${x}px, ${fh - 420 * s}px) scale(${s})`;
 }
 addEventListener("resize", fit);
+addEventListener("orientationchange", () => setTimeout(fit, 200));
 fit();
+
+// Fullscreen where the browser allows it (desktop browsers, Android); hidden where it can't work.
+const fullTarget = document.documentElement;
+if (!(fullTarget.requestFullscreen || fullTarget.webkitRequestFullscreen)) $("fullBtn").hidden = true;
+$("fullBtn").onclick = async () => {
+  try {
+    if (document.fullscreenElement || document.webkitFullscreenElement) await (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    else await (fullTarget.requestFullscreen || fullTarget.webkitRequestFullscreen).call(fullTarget);
+  } catch {
+    $("fullBtn").hidden = true;
+  }
+};
 
 function show(screen) {
   for (const s of document.querySelectorAll(".screen")) s.classList.toggle("hidden", s.id !== screen);
+  $("stage").classList.toggle("in-battle", screen === "battle");
+  if (screen === "battle") fitArena();
 }
 
 // ---------- Input: one active menu at a time ----------

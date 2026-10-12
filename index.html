@@ -10,6 +10,7 @@
 </head>
 <body>
   <div id="stage">
+    <button id="fullBtn" aria-label="เต็มจอ" title="เต็มจอ"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"/></svg></button>
     <!-- Title / mode select -->
     <section id="title" class="screen">
       <h1>UNTITLED<br />BATTLE</h1>
@@ -50,9 +51,12 @@
     <!-- Battle -->
     <section id="battle" class="screen hidden">
       <div class="field">
-        <img id="foeSprite" class="sprite foe" alt="" />
-        <img id="meSprite" class="sprite me" alt="" />
-        <canvas id="fx" width="960" height="420"></canvas>
+        <!-- The arena (background, heroes, effects) is a 960x420 scene scaled to fill the field. -->
+        <div class="arena" id="arena">
+          <img id="foeSprite" class="sprite foe" alt="" />
+          <img id="meSprite" class="sprite me" alt="" />
+          <canvas id="fx" width="960" height="420"></canvas>
+        </div>
         <div id="flash"></div>
         <div id="banner"></div>
 

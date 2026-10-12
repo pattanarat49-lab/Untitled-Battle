@@ -30,22 +30,21 @@ html, body {
 }
 
 body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: var(--ink);
   font-family: var(--thai);
 }
 
 button { font: inherit; color: inherit; cursor: pointer; }
 
-/* A fixed 960x600 stage, scaled to fit the window by game.js. */
+/* The stage fills the whole window: game.js sizes it (960x600 or wider in landscape, 600x960 or taller in
+   portrait) and scales it up to the screen, so there are no black bars in either orientation. */
 #stage {
-  position: relative;
+  position: fixed;
+  left: 0;
+  top: 0;
   width: 960px;
   height: 600px;
-  flex: none;
-  transform-origin: center center;
+  transform-origin: 0 0;
   overflow: hidden;
   background: #000;
   image-rendering: pixelated;
@@ -193,13 +192,31 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #confirmBtn:disabled { opacity: .4; cursor: default; }
 
 /* ---------- Battle ---------- */
-/* The beach arena: the image is scaled to the field's width and shifted so its two grass patches sit under the heroes. */
 .field {
   position: absolute;
   inset: 0 0 180px 0;
-  background: #7cc0f0 url("assets/battle-bg.jpg") 0 -115px / 960px auto no-repeat;
-  image-rendering: pixelated;
+  background: #2a83e3; /* the sky colour at the top of the beach image, so tall screens show more sky */
   overflow: hidden;
+}
+/* The beach image is drawn 960px wide (with mirrored copies either side for wide screens) and shifted so its
+   two grass patches sit under the heroes. */
+.arena {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 960px;
+  height: 420px;
+  transform-origin: 0 0;
+  image-rendering: pixelated;
+}
+.arena::before {
+  content: "";
+  position: absolute;
+  left: -960px;
+  top: -115px;
+  width: 2880px;
+  height: 640px;
+  background: url("assets/battle-bg.jpg") 0 0 / 100% 100% no-repeat;
 }
 .sprite {
   position: absolute;
@@ -236,7 +253,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   position: absolute;
   left: 0;
   right: 0;
-  top: 168px;
+  top: 40%;
   height: 64px;
   display: flex;
   align-items: center;
@@ -267,7 +284,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   font-family: var(--pixel);
 }
 .foe-box { left: 40px; top: 30px; width: 420px; }
-.me-box { right: 30px; top: 250px; width: 440px; }
+.me-box { right: 30px; bottom: 24px; width: 440px; }
 .infobox .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .infobox .name { font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 290px; }
 .infobox .lv { font-size: 18px; }
@@ -399,3 +416,46 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #shopList button.back { grid-template-columns: 1fr; font-family: var(--pixel); font-size: 15px; }
 #shopMsg { min-height: 26px; font-size: 18px; }
 #title .coins { margin: 0; }
+
+/* ---------- Fullscreen button ---------- */
+#fullBtn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 20;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,.5);
+  background: rgba(0,0,0,.45);
+  color: #fff;
+}
+#fullBtn:focus-visible, button:focus-visible { outline: 3px solid #ffd84a; outline-offset: 2px; }
+#select header, #shop header { padding-right: 52px; }
+
+/* ---------- Portrait: the console stacks under the field ---------- */
+.portrait .field { bottom: 390px; }
+.portrait .console { height: 390px; flex-direction: column; }
+.portrait .msgbox { flex: none; height: 130px; font-size: 24px; padding: 14px 22px; }
+.portrait .cmdbox,
+.portrait .cmdbox.moves,
+.portrait .cmdbox.wide { width: auto; flex: 1; }
+.portrait .cmdbox.moves button { font-size: 15px; }
+.portrait .cmdbox.moves button small { font-size: 15px; }
+.portrait .foe-box { left: 16px; top: 16px; width: 330px; padding: 8px 14px; }
+.portrait .me-box { right: 16px; top: 136px; bottom: auto; width: 330px; padding: 8px 14px; }
+.portrait .infobox .name { font-size: 16px; max-width: 220px; }
+.portrait .infobox .lv { font-size: 14px; }
+.portrait .hpnum { font-size: 16px; margin-top: 4px; }
+.portrait #select header { flex-wrap: wrap; }
+.portrait #search { width: 100%; }
+.portrait #picked .slot { flex: 1; min-width: 0; width: auto; }
+.portrait #select footer { flex-direction: column; }
+.portrait .select-buttons { flex-direction: row; width: auto; height: 48px; }
+.portrait #heroInfo { height: 120px; }
+.portrait #shop { padding: 24px 20px; }
+.portrait #shopList button { grid-template-columns: 1fr 96px; }
+.portrait #shopList button .own { grid-column: 2; }
+.portrait #shopList button.back { grid-template-columns: 1fr; }
