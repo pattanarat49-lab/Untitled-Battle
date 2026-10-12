@@ -1,0 +1,461 @@
+:root {
+  --ink: #383838;
+  --paper: #f8f8d8;
+  --paper-edge: #506858;
+  --sky1: #e8f4ff;
+  --sky2: #d4ecd8;
+  --grass: #9ee08a;
+  --grass-dark: #68b858;
+  --console: #283850;
+  --msg: #2f5f7f;
+  --msg-edge: #c8a848;
+  --cmd-edge: #6c6890;
+  --hp-green: #58d080;
+  --hp-yellow: #f8c838;
+  --hp-red: #f05838;
+  --p1: #2ab3e8;
+  --p2: #ec4a4a;
+  --pixel: "Press Start 2P", "Mitr", monospace;
+  --thai: "Mitr", "Press Start 2P", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #101820;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+body {
+  color: var(--ink);
+  font-family: var(--thai);
+}
+
+button { font: inherit; color: inherit; cursor: pointer; }
+
+/* The stage fills the whole window: game.js sizes it (960x600 or wider in landscape, 600x960 or taller in
+   portrait) and scales it up to the screen, so there are no black bars in either orientation. */
+#stage {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 960px;
+  height: 600px;
+  transform-origin: 0 0;
+  overflow: hidden;
+  background: #000;
+  image-rendering: pixelated;
+}
+
+.screen { position: absolute; inset: 0; }
+.hidden { display: none !important; }
+
+/* ---------- Title ---------- */
+#title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 2px, transparent 2px 6px),
+    radial-gradient(circle at 50% 35%, #4a2a7a, #120a24 70%);
+  color: #fff;
+  text-align: center;
+}
+#title h1 {
+  font-family: var(--pixel);
+  font-size: 46px;
+  line-height: 1.25;
+  margin: 0;
+  color: #ffd84a;
+  text-shadow: 4px 4px 0 #c0392b, 8px 8px 0 #2a0f40;
+  letter-spacing: 2px;
+}
+#title .sub { margin: 0; font-size: 20px; opacity: .9; }
+#title .hint { font-size: 15px; opacity: .6; margin: 0; }
+
+.menu-list { display: flex; flex-direction: column; gap: 14px; }
+.menu-list button {
+  width: 420px;
+  padding: 12px 20px;
+  font-family: var(--pixel);
+  font-size: 20px;
+  text-align: left;
+  background: var(--paper);
+  border: 4px solid var(--paper-edge);
+  border-radius: 10px;
+  box-shadow: 0 6px 0 #000;
+  color: var(--ink);
+  position: relative;
+  padding-left: 48px;
+}
+.menu-list button small { display: block; font-family: var(--thai); font-size: 16px; margin-top: 8px; color: #6a6a6a; }
+.menu-list button.sel::before,
+.cmdbox button.sel::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 10px solid transparent;
+  border-left: 14px solid var(--ink);
+  border-right: none;
+}
+
+/* ---------- Team select ---------- */
+#select {
+  display: flex;
+  flex-direction: column;
+  background: #1c2433;
+  color: #eef;
+  padding: 16px 20px;
+  gap: 10px;
+}
+#select header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+#select h2 { margin: 0; font-family: var(--pixel); font-size: 18px; line-height: 1.6; }
+#select h2 .p1 { color: var(--p1); }
+#search {
+  width: 260px;
+  padding: 8px 12px;
+  font: 16px var(--thai);
+  border-radius: 8px;
+  border: 2px solid #4a5670;
+  background: #0f1520;
+  color: #fff;
+}
+#picked { display: flex; gap: 10px; min-height: 64px; }
+#picked .slot {
+  width: 200px;
+  height: 64px;
+  border: 2px dashed #4a5670;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  font-size: 15px;
+}
+#picked .slot.full { border-style: solid; background: #2a3550; cursor: pointer; }
+#picked .slot img { width: 48px; height: 52px; object-fit: contain; image-rendering: pixelated; }
+#grid {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 6px;
+  align-content: start;
+  padding-right: 6px;
+}
+#grid button {
+  background: #283247;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 4px 2px 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #dde;
+  font-size: 11px;
+  line-height: 1.15;
+  min-height: 92px;
+}
+#grid button img { width: 48px; height: 54px; object-fit: contain; image-rendering: pixelated; }
+#grid button:hover, #grid button.sel { border-color: #ffd84a; background: #34405c; }
+#grid button.taken { opacity: .35; }
+#select footer { display: flex; gap: 16px; align-items: stretch; }
+#heroInfo {
+  flex: 1;
+  background: #0f1520;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.35;
+  height: 104px;
+  overflow: hidden;
+}
+#heroInfo b { color: #ffd84a; }
+.select-buttons { display: flex; flex-direction: column; gap: 6px; width: 150px; }
+.select-buttons button {
+  flex: 1;
+  border-radius: 8px;
+  border: 2px solid #4a5670;
+  background: #283247;
+  color: #fff;
+  font-size: 15px;
+}
+#confirmBtn { background: #2f8f4f; border-color: #5fcf7f; }
+#confirmBtn:disabled { opacity: .4; cursor: default; }
+
+/* ---------- Battle ---------- */
+.field {
+  position: absolute;
+  inset: 0 0 180px 0;
+  background: #2a83e3; /* the sky colour at the top of the beach image, so tall screens show more sky */
+  overflow: hidden;
+}
+/* The beach image is drawn 960px wide (with mirrored copies either side for wide screens) and shifted so its
+   two grass patches sit under the heroes. */
+.arena {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 960px;
+  height: 420px;
+  transform-origin: 0 0;
+  image-rendering: pixelated;
+}
+.arena::before {
+  content: "";
+  position: absolute;
+  left: -960px;
+  top: -115px;
+  width: 2880px;
+  height: 640px;
+  background: url("assets/battle-bg.jpg") 0 0 / 100% 100% no-repeat;
+}
+.sprite {
+  position: absolute;
+  image-rendering: pixelated;
+  transition: transform .18s, opacity .3s, filter .2s;
+}
+/* Sprites are ~32px pictures drawn at 6x (foe) and 7x (yours). */
+/* Riftborn sprites face right: yours (left) as drawn, the foe (right) mirrored, so they face each other. */
+.sprite.foe { --flip: -1; --ly: 20px; right: 160px; top: 40px; height: 192px; transform: scaleX(-1); transform-origin: bottom center; }
+.sprite.me { --flip: 1; --ly: -20px; left: 180px; bottom: 0; height: 240px; transform-origin: bottom center; }
+.sprite.lunge { transform: scaleX(var(--flip)) translate(70px, var(--ly)); }
+.sprite.recoil { transform: scaleX(var(--flip)) translate(-26px, 0); }
+.sprite.hit { animation: blink .5s steps(2) 2; }
+.sprite.faint { opacity: 0; transform: scaleX(var(--flip)) translateY(60px); }
+.sprite.enter { animation: enter .45s ease-out; }
+.sprite.cast { filter: drop-shadow(0 0 10px var(--glow, #fff)) brightness(1.25); }
+@keyframes blink { 50% { opacity: .1; } }
+@keyframes enter { from { transform: scaleX(calc(var(--flip) * .2)) scaleY(.2); opacity: 0; } }
+
+.shake { animation: shake .35s; }
+@keyframes shake {
+  20% { transform: translate(-8px, 2px); }
+  40% { transform: translate(8px, -2px); }
+  60% { transform: translate(-6px, 0); }
+  80% { transform: translate(6px, 0); }
+}
+
+#fx { position: absolute; inset: 0; width: 960px; height: 420px; pointer-events: none; }
+#flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+#flash.on { animation: flash .35s ease-out; }
+@keyframes flash { from { opacity: .75; } to { opacity: 0; } }
+/* The skill name sweeps across the field when a skill is cast. */
+#banner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 40%;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pixel);
+  font-size: 30px;
+  color: #fff;
+  text-shadow: 3px 3px 0 #000;
+  letter-spacing: 3px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 5;
+}
+#banner.on { animation: banner 1s ease-out; }
+@keyframes banner {
+  0% { opacity: 0; transform: translateX(-60%) skewX(-12deg); }
+  20%, 70% { opacity: 1; transform: translateX(0) skewX(-12deg); }
+  100% { opacity: 0; transform: translateX(60%) skewX(-12deg); }
+}
+
+.infobox {
+  position: absolute;
+  background: var(--paper);
+  border: 5px solid var(--paper-edge);
+  border-radius: 16px 4px 16px 4px;
+  box-shadow: 8px 8px 0 rgba(40,60,50,.55);
+  padding: 10px 18px 10px;
+  font-family: var(--pixel);
+}
+.foe-box { left: 40px; top: 30px; width: 420px; }
+.me-box { right: 30px; bottom: 24px; width: 440px; }
+.infobox .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.infobox .name { font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 290px; }
+.infobox .lv { font-size: 18px; }
+.infobox .type {
+  font-size: 10px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  color: #fff;
+  margin: 6px 0 4px;
+}
+.infobox .status { font-size: 10px; display: flex; gap: 4px; }
+.infobox .status span { padding: 3px 5px; border-radius: 4px; color: #fff; }
+.hpbar {
+  display: flex;
+  align-items: center;
+  background: #405048;
+  border-radius: 8px;
+  padding: 3px 4px 3px 8px;
+  gap: 6px;
+}
+.hpbar b { color: #f8b830; font-size: 12px; }
+.hpbar .track { flex: 1; height: 12px; background: #506058; border-radius: 4px; overflow: hidden; }
+.hpbar .fill { height: 100%; width: 100%; background: var(--hp-green); transition: width .6s ease-out, background-color .3s; }
+.hpnum { text-align: right; font-size: 20px; margin-top: 8px; }
+.balls { display: flex; gap: 6px; margin-top: 6px; }
+.balls i { width: 14px; height: 14px; border-radius: 50%; background: linear-gradient(#e84040 50%, #fff 50%); border: 2px solid #333; }
+.balls i.out { background: #999; }
+
+.console {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 180px;
+  background: var(--console);
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+}
+.msgbox {
+  flex: 1;
+  background: var(--msg);
+  border: 6px solid var(--msg-edge);
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 4px #e8e0c8;
+  padding: 18px 26px;
+  color: #fff;
+  font-size: 26px;
+  line-height: 1.5;
+  text-shadow: 2px 2px 0 #16303f;
+}
+.msgbox p { margin: 0; white-space: pre-line; }
+.msgbox .desc { display: block; font-size: 19px; line-height: 1.45; }
+.cmdbox {
+  width: 440px;
+  background: #fff;
+  border: 6px solid var(--cmd-edge);
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 4px #d8d8e8;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 12px 12px;
+  gap: 4px;
+}
+.cmdbox:empty { display: none; }
+.cmdbox button {
+  position: relative;
+  background: none;
+  border: 0;
+  text-align: left;
+  padding: 0 8px 0 40px;
+  font-family: var(--pixel);
+  font-size: 22px;
+  border-radius: 6px;
+}
+.cmdbox button:disabled { color: #b0b0b0; cursor: default; }
+.cmdbox button:not(:disabled):hover { background: #f0f0f8; }
+.cmdbox.moves { width: 560px; }
+.cmdbox.moves button { font-size: 13px; line-height: 1.5; }
+.cmdbox.moves button small { display: block; font-family: var(--thai); font-size: 13px; color: #777; }
+.cmdbox.list button { font-family: var(--thai); font-size: 17px; }
+.cmdbox.list button small { color: #777; font-size: 13px; display: block; }
+.cmdbox.wide { width: 560px; }
+
+/* ---------- Shop ---------- */
+#shop {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px 40px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0 2px, transparent 2px 40px),
+    linear-gradient(#3a2414, #1e120a);
+  color: #fff4dc;
+}
+#shop header { display: flex; justify-content: space-between; align-items: center; }
+#shop h2 { margin: 0; font-family: var(--pixel); font-size: 26px; color: #ffd84a; text-shadow: 3px 3px 0 #000; }
+.coins { font-family: var(--pixel); font-size: 18px; color: #ffd84a; }
+.coins::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 10px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff6b0, #f0b020 60%, #a06a00); vertical-align: -2px; }
+#shopList { display: flex; flex-direction: column; gap: 8px; }
+#shopList button {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 140px 110px;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  padding: 8px 18px 8px 48px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 4px solid #8a5a2a;
+  border-radius: 10px;
+  font-size: 17px;
+}
+#shopList button b { font-family: var(--pixel); font-size: 15px; display: block; margin-bottom: 4px; }
+#shopList button .price { font-family: var(--pixel); font-size: 14px; color: #a06a00; }
+#shopList button .own { font-size: 15px; color: #666; }
+#shopList button.sel::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 10px solid transparent;
+  border-left: 14px solid var(--ink);
+  border-right: none;
+}
+#shopList button:disabled { opacity: .55; cursor: default; }
+#shopList button.back { grid-template-columns: 1fr; font-family: var(--pixel); font-size: 15px; }
+#shopMsg { min-height: 26px; font-size: 18px; }
+#title .coins { margin: 0; }
+
+/* ---------- Fullscreen button ---------- */
+#fullBtn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 20;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,.5);
+  background: rgba(0,0,0,.45);
+  color: #fff;
+}
+#fullBtn:focus-visible, button:focus-visible { outline: 3px solid #ffd84a; outline-offset: 2px; }
+#select header, #shop header { padding-right: 52px; }
+
+/* ---------- Portrait: the console stacks under the field ---------- */
+.portrait .field { bottom: 390px; }
+.portrait .console { height: 390px; flex-direction: column; }
+.portrait .msgbox { flex: none; height: 130px; font-size: 24px; padding: 14px 22px; }
+.portrait .cmdbox,
+.portrait .cmdbox.moves,
+.portrait .cmdbox.wide { width: auto; flex: 1; }
+.portrait .cmdbox.moves button { font-size: 15px; }
+.portrait .cmdbox.moves button small { font-size: 15px; }
+.portrait .foe-box { left: 16px; top: 16px; width: 330px; padding: 8px 14px; }
+.portrait .me-box { right: 16px; top: 136px; bottom: auto; width: 330px; padding: 8px 14px; }
+.portrait .infobox .name { font-size: 16px; max-width: 220px; }
+.portrait .infobox .lv { font-size: 14px; }
+.portrait .hpnum { font-size: 16px; margin-top: 4px; }
+.portrait #select header { flex-wrap: wrap; }
+.portrait #search { width: 100%; }
+.portrait #picked .slot { flex: 1; min-width: 0; width: auto; }
+.portrait #select footer { flex-direction: column; }
+.portrait .select-buttons { flex-direction: row; width: auto; height: 48px; }
+.portrait #heroInfo { height: 120px; }
+.portrait #shop { padding: 24px 20px; }
+.portrait #shopList button { grid-template-columns: 1fr 96px; }
+.portrait #shopList button .own { grid-column: 2; }
+.portrait #shopList button.back { grid-template-columns: 1fr; }
