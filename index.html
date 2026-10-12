@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>Untitled Battle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Mitr:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="stage">
+    <!-- Title / mode select -->
+    <section id="title" class="screen">
+      <h1>UNTITLED<br />BATTLE</h1>
+      <p class="sub">ฮีโร่จาก RIFTBORN · ผลัดกันร่ายสกิลจนกว่าจะเหลือคนสุดท้าย</p>
+      <div class="menu-list" id="modeMenu">
+        <button data-mode="cpu">1 PLAYER <small>สู้กับ CPU</small></button>
+        <button data-mode="pvp">2 PLAYERS <small>ผลัดกันเล่นเครื่องเดียว</small></button>
+      </div>
+      <p class="hint">ลูกศร / คลิก เพื่อเลือก · Z หรือ Enter = ตกลง · X หรือ Esc = ย้อนกลับ</p>
+    </section>
+
+    <!-- Team select -->
+    <section id="select" class="screen hidden">
+      <header>
+        <h2 id="selectTitle">PLAYER 1: เลือกทีม 3 ตัว</h2>
+        <input id="search" type="search" placeholder="ค้นหาฮีโร่..." autocomplete="off" />
+      </header>
+      <div id="picked"></div>
+      <div id="grid"></div>
+      <footer>
+        <div id="heroInfo">ชี้ที่ฮีโร่เพื่อดูสกิล</div>
+        <div class="select-buttons">
+          <button id="randomBtn">สุ่มทีม</button>
+          <button id="backBtn">ย้อนกลับ</button>
+          <button id="confirmBtn" disabled>ยืนยัน</button>
+        </div>
+      </footer>
+    </section>
+
+    <!-- Battle -->
+    <section id="battle" class="screen hidden">
+      <div class="field">
+        <div class="pad pad-foe"></div>
+        <div class="pad pad-me"></div>
+        <img id="foeSprite" class="sprite foe" alt="" />
+        <img id="meSprite" class="sprite me" alt="" />
+        <div id="fx"></div>
+
+        <div class="infobox foe-box">
+          <div class="row"><span class="name" id="foeName"></span><span class="lv" id="foeLv"></span></div>
+          <div class="row"><span class="type" id="foeType"></span><span class="status" id="foeStatus"></span></div>
+          <div class="hpbar"><b>HP</b><div class="track"><div class="fill" id="foeHp"></div></div></div>
+          <div class="balls" id="foeBalls"></div>
+        </div>
+
+        <div class="infobox me-box">
+          <div class="row"><span class="name" id="meName"></span><span class="lv" id="meLv"></span></div>
+          <div class="row"><span class="type" id="meType"></span><span class="status" id="meStatus"></span></div>
+          <div class="hpbar"><b>HP</b><div class="track"><div class="fill" id="meHp"></div></div></div>
+          <div class="hpnum" id="meHpNum"></div>
+          <div class="balls" id="meBalls"></div>
+        </div>
+        <div id="turnTag"></div>
+      </div>
+
+      <div class="console">
+        <div class="msgbox"><p id="msg"></p></div>
+        <div class="cmdbox" id="cmdbox"></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="data/heroes.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
